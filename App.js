@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Permissions from 'expo-permissions';
@@ -26,6 +27,17 @@ export default class App extends Component {
     this.setState({ hasCameraPermission: status === 'granted' });
   }
 
+  async capture() {
+    const { imageList } = this.state;
+    const photo = await this.camera.takePictureAsync();
+    imageList.push(photo)
+    console.log("imageList ==> ", imageList)
+    this.setState({
+      imageList: imageList,
+      showCamera: false,
+    })
+  }
+
   _renderCamera() {
     const { hasCameraPermission } = this.state;
     if (hasCameraPermission === null) {
@@ -35,7 +47,7 @@ export default class App extends Component {
     } else {
       return (
         <View style={{ flex: 1 }}>
-          <Camera style={{ flex: 1 }} type={this.state.type}>
+          <Camera ref={ref => { this.camera = ref }} style={{ flex: 1 }} type={this.state.type}>
             <View
               style={{
                 flex: 1,
@@ -58,8 +70,7 @@ export default class App extends Component {
                         : Camera.Constants.Type.back,
                   });
                 }}>
-                <Ionicons name="md-reverse-camera" size={40} color="white" />
-                {/* <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> Flip </Text> */}
+                <Ionicons name="md-reverse-camera" size={30} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -69,16 +80,8 @@ export default class App extends Component {
                   marginBottom: 10,
                   marginRight: 10,
                 }}
-                onPress={() => {
-                  this.setState({
-                    type:
-                      this.state.type === Camera.Constants.Type.back
-                        ? Camera.Constants.Type.front
-                        : Camera.Constants.Type.back,
-                  });
-                }}>
-                <Ionicons name="md-camera" size={40} color="white" />
-                {/* <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> Flip </Text> */}
+                onPress={() => this.capture()}>
+                <Ionicons name="md-camera" size={30} color="white" />
               </TouchableOpacity>
             </View>
           </Camera>
@@ -89,7 +92,8 @@ export default class App extends Component {
 
   _renderMainList() {
     const { imageList, } = this.state;
-    console.log(imageList)
+    console.log("render imageList ==> ", imageList)
+
     return (
 
       <View style={styles.container}>
@@ -108,8 +112,8 @@ export default class App extends Component {
         </Text>
         {imageList.length ?
           <FlatList
-            data={[{ key: 'a' }, { key: 'b' }]}
-            renderItem={({ item }) => <Text>{item.key}</Text>}
+            data={imageList}
+            renderItem={this._renderImageList}
           /> :
           <Text>You don't have any image.</Text>
         }
@@ -132,9 +136,24 @@ export default class App extends Component {
     )
   }
 
+  _renderImageList({ item }) {
+    return (
+      <View style={{ flex: 1, flexDirection: 'row', marginBottom: 3 }}>
+        <Image
+          source={{ uri: item.imageUri }}
+          style={{ width: 100, height: 100, margin: 5 }}
+        />
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Text>{item.imageUri}</Text>
+        </View>
+        <Ionicons name="md-checkmark-circle" size={32} color="green" />
+      </View>
+    );
+  }
+
   render() {
     const { showCamera } = this.state;
-    console.log(showCamera)
+    // console.log(showCamera)
     return (
       <View style={{ flex: 1 }}>
         {showCamera ? this._renderCamera() : this._renderMainList()}
