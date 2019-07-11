@@ -30,12 +30,12 @@ export default class App extends Component {
   async capture() {
     const { imageList } = this.state;
     const photo = await this.camera.takePictureAsync();
-    imageList.push(photo)
-    console.log("imageList ==> ", imageList)
+    imageList.push(photo);
+    console.log('imageList ==> ', imageList);
     this.setState({
       imageList: imageList,
       showCamera: false,
-    })
+    });
   }
 
   _renderCamera() {
@@ -47,7 +47,12 @@ export default class App extends Component {
     } else {
       return (
         <View style={{ flex: 1 }}>
-          <Camera ref={ref => { this.camera = ref }} style={{ flex: 1 }} type={this.state.type}>
+          <Camera
+            ref={ref => {
+              this.camera = ref;
+            }}
+            style={{ flex: 1 }}
+            type={this.state.type}>
             <View
               style={{
                 flex: 1,
@@ -56,11 +61,11 @@ export default class App extends Component {
               }}>
               <TouchableOpacity
                 style={{
-                  flex: 0.1,
-                  alignSelf: 'flex-end',
+                  position: 'absolute',
                   alignItems: 'center',
-                  marginBottom: 10,
-                  marginLeft: 10,
+                  justifyContent: 'center',
+                  bottom: 20,
+                  left: 20,
                 }}
                 onPress={() => {
                   this.setState({
@@ -74,14 +79,25 @@ export default class App extends Component {
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                  flex: 1,
-                  alignSelf: 'flex-end',
-                  alignItems: 'flex-end',
-                  marginBottom: 10,
-                  marginRight: 10,
+                  position: 'absolute',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bottom: 20,
+                  right: 20,
                 }}
                 onPress={() => this.capture()}>
                 <Ionicons name="md-camera" size={30} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  position: 'absolute',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  top: 20,
+                  left: 20,
+                }}
+                onPress={() => this.setState({ showCamera: false })}>
+                <Ionicons name="md-arrow-back" size={30} color="white" />
               </TouchableOpacity>
             </View>
           </Camera>
@@ -91,11 +107,10 @@ export default class App extends Component {
   }
 
   _renderMainList() {
-    const { imageList, } = this.state;
-    console.log("render imageList ==> ", imageList)
+    const { imageList } = this.state;
+    console.log('render imageList ==> ', imageList);
 
     return (
-
       <View style={styles.container}>
         <Text
           style={{
@@ -110,45 +125,63 @@ export default class App extends Component {
           }}>
           Camera Todo App
         </Text>
-        {imageList.length ?
+        {imageList.length ? (
           <FlatList
             data={imageList}
             renderItem={this._renderImageList}
-          /> :
-          <Text>You don't have any image.</Text>
-        }
+            keyExtractor={(item, index) => index.toString()}
+            ItemSeparatorComponent={this._renderSeprator}
+          />
+        ) : (
+            <Text style={{ marginLeft: 105, marginTop: 200, }}>You don't have any image.</Text>
+          )}
         <TouchableOpacity
           style={{
-            flex: 0.1,
-            alignSelf: 'flex-end',
+            position: 'absolute',
+            width: 50,
+            height: 50,
             alignItems: 'center',
-            marginBottom: 20,
-            marginRight: 10,
+            justifyContent: 'center',
+            backgroundColor: 'green',
+            right: 20,
+            bottom: 20,
+            borderRadius: 30,
+            elevation: 8,
           }}
           onPress={() => {
             this.setState({
               showCamera: true,
             });
           }}>
-          <Ionicons name="md-add-circle-outline" size={50} color="green" />
+          <Text style={{ fontSize: 40, color: 'white' }}>+</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   _renderImageList({ item }) {
     return (
       <View style={{ flex: 1, flexDirection: 'row', marginBottom: 3 }}>
         <Image
-          source={{ uri: item.imageUri }}
+          source={{ uri: item.uri }}
           style={{ width: 100, height: 100, margin: 5 }}
         />
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-          <Text>{item.imageUri}</Text>
+        <View style={{ flex: 7, justifyContent: 'center' }}>
+          <Text>{item.uri.replace("file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540anonymous%252FCameraTodoList-65f24c03-5f91-48e3-b7b1-804c9099aca5/Camera/", "")}</Text>
         </View>
-        <Ionicons name="md-checkmark-circle" size={32} color="green" />
+        <TouchableOpacity style={{ flex: 1, justifyContent: 'center', }}>
+          <Ionicons name="md-more" size={32} color="gray" />
+        </TouchableOpacity>
       </View>
     );
+  }
+
+  _renderSeprator() {
+    return (
+      <View
+        style={{ height: 1, width: '100%', backgroundColor: 'gray', }}>
+      </View>
+    )
   }
 
   render() {
@@ -166,7 +199,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    // alignItems: 'center',
+    // justifyContent: 'space-between',
   },
 });
